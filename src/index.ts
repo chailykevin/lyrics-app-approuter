@@ -1,4 +1,9 @@
-import "dotenv/config";
+import "dotenv";
 import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
 
-const db = drizzle(process.env.DATABASE_URL!);
+import * as schema from "@/db/schema";
+
+const poolConnection = mysql.createPool(process.env.DATABASE_URL!);
+
+export const db = drizzle(poolConnection, { schema, mode: "default" });
