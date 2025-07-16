@@ -1,4 +1,5 @@
 import SongCard from "@/components/SongCard";
+import environment from "@/config/environment";
 import { db } from "@/index";
 import Link from "next/link";
 
@@ -20,7 +21,7 @@ type Artist = {
 
 const AdminSongsPage = async () => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/songs`,
+    `${environment.NEXT_PUBLIC_BASE_URL}/api/songs`,
     {
       method: "GET",
       headers: {

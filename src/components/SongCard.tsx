@@ -1,5 +1,6 @@
 "use client";
 
+import environment from "@/config/environment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaTrash } from "react-icons/fa6";
@@ -30,7 +31,7 @@ const SongCard = ({ song }: SongCardProps) => {
   const handleDelete = async () => {
     alert(song.id);
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/songs/${song.id}`,
+      `${environment.NEXT_PUBLIC_BASE_URL}/api/songs/${song.id}`,
       {
         method: "DELETE",
         headers: {

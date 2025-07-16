@@ -1,4 +1,5 @@
 import ArtistCard from "@/components/ArtistCard";
+import environment from "@/config/environment";
 import Link from "next/link";
 
 type Artist = {
@@ -9,12 +10,15 @@ type Artist = {
 };
 
 const AdminArtistsPage = async () => {
-  const response = await fetch("http://localhost:3000/api/artists", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  const response = await fetch(
+    `${environment.NEXT_PUBLIC_BASE_URL}/api/artists`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   const allArtist = await response.json();
 

@@ -1,4 +1,5 @@
 import AdminArtistForm from "@/components/ArtistForm";
+import environment from "@/config/environment";
 
 type AdminArtistFormPageProps = {
   params: {
@@ -10,7 +11,7 @@ const AdminArtistFormPage = async ({ params }: AdminArtistFormPageProps) => {
   const { id } = params;
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/artists/${id}`,
+    `$${environment.NEXT_PUBLIC_BASE_URL}/api/artists/${id}`,
     {
       method: "GET",
       headers: {

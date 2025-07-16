@@ -1,5 +1,6 @@
 "use client";
 
+import environment from "@/config/environment";
 import Link from "next/link";
 import { FaTrash } from "react-icons/fa6";
 
@@ -20,7 +21,7 @@ type ArtistCardProps = {
 const ArtistCard = ({ artist }: ArtistCardProps) => {
   const handleDelete = async () => {
     const response = await fetch(
-      `http://localhost:3000/api/artists/${artist.id}`,
+      `${environment.NEXT_PUBLIC_BASE_URL}/api/artists/${artist.id}`,
       {
         method: "DELETE",
         headers: {

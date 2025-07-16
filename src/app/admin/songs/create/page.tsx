@@ -1,4 +1,5 @@
 import AdminSongForm from "@/components/SongForm";
+import environment from "@/config/environment";
 
 type Artist = {
   id: number;
@@ -8,12 +9,15 @@ type Artist = {
 };
 
 const AdminNewSongPage = async () => {
-  const response = await fetch("http://localhost:3000/api/artists", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  const response = await fetch(
+    `${environment.NEXT_PUBLIC_BASE_URL}/api/artists`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   const allArtist = await response.json();
 
