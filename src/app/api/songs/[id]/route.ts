@@ -2,10 +2,12 @@ import { artist_song, songs } from "@/db/schema";
 import { db } from "@/index";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import { songSchema } from "@/lib/validators/song";
+import * as yup from "yup";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: number }> }
+  { params }: { params: { id: number } }
 ) {
   const { id } = await params;
   const songId = Number(id);
@@ -72,7 +74,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: number }> }
+  { params }: { params: { id: number } }
 ) {
   const { id } = await params;
   const songId = Number(id);
@@ -88,48 +90,20 @@ export async function PUT(
   }
 
   try {
-    const { title, lyrics, artistIds } = await request.json();
+    const body = await request.json();
 
-    if (!title) {
-      return NextResponse.json(
-        {
-          message: "Judul lagu tidak boleh kosong",
-          data: null,
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!lyrics) {
-      return NextResponse.json(
-        {
-          message: "Lirik lagu tidak boleh kosong",
-          data: null,
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!artistIds || !Array.isArray(artistIds) || artistIds.length === 0) {
-      return NextResponse.json(
-        {
-          message: "Pilih minimal satu artis",
-          data: null,
-        },
-        { status: 400 }
-      );
-    }
+    const validateData = await songSchema.validate(body);
 
     await db
       .update(songs)
-      .set({ title: title, lyrics: lyrics })
+      .set({ title: validateData.title, lyrics: validateData.lyrics })
       .where(eq(songs.id, songId));
 
     await db.delete(artist_song).where(eq(artist_song.songId, songId));
 
-    const songArtists = artistIds.map((artistId: number) => ({
+    const songArtists = validateData.artistIds.map((artistId) => ({
       songId: songId,
-      artistId: artistId,
+      artistId: parseInt(artistId!),
     }));
 
     await db.insert(artist_song).values(songArtists);
@@ -172,6 +146,16 @@ export async function PUT(
       { status: 200 }
     );
   } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      return NextResponse.json(
+        {
+          message: error.message,
+          data: null,
+        },
+        { status: 400 }
+      );
+    }
+
     const err = error as unknown as Error;
     return NextResponse.json(
       {
@@ -185,7 +169,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: number }> }
+  { params }: { params: { id: number } }
 ) {
   const { id } = await params;
   const songId = Number(id);

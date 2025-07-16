@@ -1,7 +1,9 @@
 import { artists } from "@/db/schema";
 import { db } from "@/index";
+import { artistSchema } from "@/lib/validators/artist";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import * as yup from "yup";
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,19 +30,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { name } = await request.json();
+    const body = await request.json();
 
-    if (!name) {
-      return NextResponse.json(
-        {
-          message: "Nama artist tidak boleh kosong",
-          data: null,
-        },
-        { status: 400 }
-      );
-    }
+    const validateData = await artistSchema.validate(body);
 
-    const response = await db.insert(artists).values({ name });
+    const response = await db
+      .insert(artists)
+      .values({ name: validateData.name });
     const newArtistId = response[0].insertId;
 
     const newArtist = await db
@@ -56,6 +52,16 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      return NextResponse.json(
+        {
+          message: error.message,
+          data: null,
+        },
+        { status: 400 }
+      );
+    }
+
     const err = error as unknown as Error;
     return NextResponse.json(
       {

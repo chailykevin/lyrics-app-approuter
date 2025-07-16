@@ -1,11 +1,13 @@
 import { artist_song, artists } from "@/db/schema";
 import { db } from "@/index";
+import { artistSchema } from "@/lib/validators/artist";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import * as yup from "yup";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const { id } = await params;
   const artistId = Number(id);
@@ -57,7 +59,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const { id } = await params;
   const artistId = Number(id);
@@ -73,21 +75,13 @@ export async function PUT(
   }
 
   try {
-    const { name } = await request.json();
+    const body = await request.json();
 
-    if (!name) {
-      return NextResponse.json(
-        {
-          message: "Nama artist tidak boleh kosong",
-          data: null,
-        },
-        { status: 400 }
-      );
-    }
+    const validateData = await artistSchema.validate(body);
 
     const artist = await db
       .update(artists)
-      .set({ name })
+      .set({ name: validateData.name })
       .where(eq(artists.id, artistId));
 
     if (!artist[0].affectedRows) {
@@ -113,6 +107,18 @@ export async function PUT(
       { status: 200 }
     );
   } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      return NextResponse.json(
+        {
+          message: error.message,
+          data: null,
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
     const err = error as unknown as Error;
     return NextResponse.json(
       {
@@ -126,7 +132,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const { id } = await params;
   const artistId = Number(id);

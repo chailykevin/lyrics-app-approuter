@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/index";
 import { artist_song, songs } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { songSchema } from "@/lib/validators/song";
+import * as yup from "yup";
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,44 +48,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { title, lyrics, artistIds } = await request.json();
+    const body = await request.json();
 
-    if (!title) {
-      return NextResponse.json(
-        {
-          message: "Judul lagu tidak boleh kosong",
-          data: null,
-        },
-        { status: 400 }
-      );
-    }
+    const validateData = await songSchema.validate(body);
 
-    if (!lyrics) {
-      return NextResponse.json(
-        {
-          message: "Lirik lagu tidak boleh kosong",
-          data: null,
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!artistIds || !Array.isArray(artistIds) || artistIds.length === 0) {
-      return NextResponse.json(
-        {
-          message: "Pilih minimal satu artis",
-          data: null,
-        },
-        { status: 400 }
-      );
-    }
-
-    const newSong = await db.insert(songs).values({ title, lyrics });
+    const newSong = await db
+      .insert(songs)
+      .values({ title: validateData.title, lyrics: validateData.lyrics });
     const newSongId = newSong[0].insertId;
 
-    const songArtists = artistIds.map((artistId: number) => ({
+    const songArtists = validateData.artistIds.map((artistId) => ({
       songId: newSongId,
-      artistId: artistId,
+      artistId: parseInt(artistId!),
     }));
 
     await db.insert(artist_song).values(songArtists);
@@ -115,6 +91,16 @@ export async function POST(request: NextRequest) {
       }
     );
   } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      return NextResponse.json(
+        {
+          message: error.message,
+          data: null,
+        },
+        { status: 400 }
+      );
+    }
+
     const err = error as unknown as Error;
     return NextResponse.json(
       {
