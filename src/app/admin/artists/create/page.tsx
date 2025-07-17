@@ -1,7 +1,7 @@
+export const dynamic = "force-dynamic";
+
 import AdminArtistForm from "@/components/ArtistForm";
 
-const AdminNewArtistPage = () => {
+export default function AdminNewArtistPage() {
   return <AdminArtistForm />;
-};
-
-export default AdminNewArtistPage;
+}
