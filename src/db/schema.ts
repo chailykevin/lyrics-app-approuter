@@ -68,6 +68,11 @@ export const songRelations = relations(songs, ({ many }) => ({
   album_song: many(album_song),
 }));
 
+export const albumRelations = relations(albums, ({ many }) => ({
+  album_artist: many(album_artist),
+  album_song: many(album_song),
+}));
+
 export const artistsongRelations = relations(artist_song, ({ one }) => ({
   artist: one(artists, {
     fields: [artist_song.artistId],
