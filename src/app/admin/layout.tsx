@@ -14,6 +14,7 @@ export default function AdminLayout({ children }: Props) {
   const navItems = [
     { href: "/admin/songs", label: "Manajemen Lagu" },
     { href: "/admin/artists", label: "Manajemen Artis" },
+    { href: "/admin/albums", label: "Manajemen Album" },
   ];
 
   return (
