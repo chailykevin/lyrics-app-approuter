@@ -26,7 +26,7 @@ export const songs = mysqlTable("songs", {
 export const albums = mysqlTable("albums", {
   id: int("id").autoincrement().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
-  releasedDate: date().notNull(),
+  releaseDate: date().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
