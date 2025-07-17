@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { songSchema } from "@/lib/validators/song";
 import * as yup from "yup";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const allSongs = await db.query.songs.findMany({
       with: {
