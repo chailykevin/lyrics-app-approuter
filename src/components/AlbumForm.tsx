@@ -1,6 +1,6 @@
 "use client";
 
-import { addAlbum } from "@/app/actions/album";
+import { addAlbum, editAlbum } from "@/app/actions/album";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -79,10 +79,11 @@ export default function AdminAlbumForm({
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     //Server action POST dan PUT
     event.preventDefault();
-
     setIsSubmitting(true);
 
-    const response = await addAlbum(new FormData(event.currentTarget));
+    const response = id
+      ? await addAlbum(new FormData(event.currentTarget))
+      : await editAlbum(new FormData(event.currentTarget), id!);
 
     if (response === "Sukses") {
       alert(`Album berhasil ${id ? "diubah" : "ditambahkan"}!`);
