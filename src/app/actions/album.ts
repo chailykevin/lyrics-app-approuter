@@ -79,11 +79,19 @@ export async function deleteAlbum(formData: FormData) {
     notFound();
   }
 
-  const deletedAlbum = await db
-    .delete(albums)
-    .where(eq(albums.id, rawFormData.id));
+  let deletedAlbum;
 
-  if (deletedAlbum[0].affectedRows === 0) {
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(album_artist)
+      .where(eq(album_artist.albumId, rawFormData.id));
+
+    await tx.delete(album_song).where(eq(album_song.albumId, rawFormData.id));
+
+    deletedAlbum = await tx.delete(albums).where(eq(albums.id, rawFormData.id));
+  });
+
+  if (deletedAlbum![0].affectedRows === 0) {
     return "Gagal";
   } else {
     return "Berhasil";
