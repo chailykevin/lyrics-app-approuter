@@ -1,6 +1,6 @@
 "use server";
 
-import { album_artist, album_song, albums, songs } from "@/db/schema";
+import { album_artist, album_song, albums } from "@/db/schema";
 import { db } from "@/index";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
