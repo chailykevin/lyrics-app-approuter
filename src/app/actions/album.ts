@@ -1,9 +1,74 @@
 "use server";
 
-import { albums } from "@/db/schema";
+import { album_artist, album_song, albums } from "@/db/schema";
 import { db } from "@/index";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import * as yup from "yup";
+
+const albumSchema = yup.object({
+  title: yup
+    .string()
+    .trim()
+    .min(2, "Album harus memiliki minimal 2 karakter")
+    .required(),
+  releaseDate: yup.string().required(),
+  artists: yup
+    .array(yup.number())
+    .min(1, "Album harus memiliki minimal 1 artis")
+    .required(),
+  songs: yup
+    .array(yup.number())
+    .min(1, "Album harus memiliki minimal 1 lagu")
+    .required(),
+});
+
+export async function addAlbum(formData: FormData) {
+  const rawFormData = {
+    title: formData.get("title"),
+    releaseDate: formData.get("releaseDate"),
+    artists: formData.getAll("artists").map(Number),
+    songs: formData.getAll("songs").map(Number),
+  };
+
+  const validationData = await albumSchema.validate(rawFormData);
+
+  let albumId: number;
+
+  await db.transaction(async (tx) => {
+    const newAlbum = await tx.insert(albums).values({
+      title: validationData.title,
+      releaseDate: new Date(validationData.releaseDate),
+    });
+
+    albumId = newAlbum[0].insertId;
+
+    const albumArtists = validationData.artists.map((artistId) => ({
+      albumId: albumId,
+      artistId: artistId!,
+    }));
+
+    await tx.insert(album_artist).values(albumArtists);
+
+    const albumSongs = validationData.songs.map((songId) => ({
+      albumId: albumId,
+      songId: songId!,
+    }));
+
+    await tx.insert(album_song).values(albumSongs);
+  });
+
+  const newAlbum = await db
+    .select()
+    .from(albums)
+    .where(eq(albums.id, albumId!));
+
+  if (newAlbum.length === 1) {
+    return "Sukses";
+  } else {
+    return "Gagal";
+  }
+}
 
 export async function deleteAlbum(formData: FormData) {
   const rawFormData = {
