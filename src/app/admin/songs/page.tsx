@@ -1,5 +1,6 @@
+export const dynamic = "force-dynamic";
+
 import SongCard from "@/components/SongCard";
-import environment from "@/config/environment";
 import { db } from "@/index";
 import Link from "next/link";
 
@@ -19,23 +20,30 @@ type Artist = {
   updatedAt: string;
 };
 
-const AdminSongsPage = async () => {
-  const response = await fetch(
-    `${environment.NEXT_PUBLIC_BASE_URL}/api/songs`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+export default async function AdminSongsPage() {
+  //GET all songs
+
+  const allSongs = await db.query.songs.findMany({
+    with: {
+      artist_song: {
+        with: {
+          artist: true,
+        },
       },
-    }
-  );
+    },
+  });
 
-  const allSongs = await response.json();
-
-  const allSongsX = allSongs.data.map((song: Song) => ({
-    ...song,
-    createdAt: song.createdAt.toString(),
-    updatedAt: song.updatedAt.toString(),
+  const allSongs2 = allSongs.map((song) => ({
+    id: song.id,
+    title: song.title,
+    lyrics: song.lyrics,
+    createdAt: song.createdAt.toISOString(),
+    updatedAt: song.updatedAt.toISOString(),
+    artists: song.artist_song.map((link) => ({
+      ...link.artist,
+      createdAt: link.artist.createdAt.toISOString(),
+      updatedAt: link.artist.updatedAt.toISOString(),
+    })), // <--- Perbaiki nama properti di sini
   }));
 
   return (
@@ -46,11 +54,9 @@ const AdminSongsPage = async () => {
       >
         Tambah Data Baru
       </Link>
-      {allSongsX.map((song: Song) => {
+      {allSongs2.map((song: Song) => {
         return <SongCard key={song.id} song={song} />;
       })}
     </>
   );
-};
-
-export default AdminSongsPage;
+}

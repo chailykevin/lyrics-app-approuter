@@ -1,5 +1,8 @@
+export const dynamic = "force-dynamic";
+
 import ArtistCard from "@/components/ArtistCard";
-import environment from "@/config/environment";
+import { artists } from "@/db/schema";
+import { db } from "@/index";
 import Link from "next/link";
 
 type Artist = {
@@ -10,22 +13,14 @@ type Artist = {
 };
 
 const AdminArtistsPage = async () => {
-  const response = await fetch(
-    `${environment.NEXT_PUBLIC_BASE_URL}/api/artists`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  //GET all artists
 
-  const allArtist = await response.json();
+  const allArtists = await db.select().from(artists);
 
-  const allArtistsX = allArtist.data.map((artist: Artist) => ({
+  const formattedArtists = allArtists.map((artist) => ({
     ...artist,
-    createdAt: artist.createdAt.toString(),
-    updatedAt: artist.updatedAt.toString(),
+    createdAt: artist.createdAt.toISOString(),
+    updatedAt: artist.updatedAt.toISOString(),
   }));
 
   return (
@@ -36,7 +31,7 @@ const AdminArtistsPage = async () => {
       >
         Tambah Data Baru
       </Link>
-      {allArtistsX.map((artist: Artist) => {
+      {formattedArtists.map((artist: Artist) => {
         return <ArtistCard key={artist.id} artist={artist} />;
       })}
     </>

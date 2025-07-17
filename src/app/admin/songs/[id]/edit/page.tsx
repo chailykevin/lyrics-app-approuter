@@ -1,56 +1,57 @@
 import AdminSongForm from "@/components/SongForm";
-import environment from "@/config/environment";
+import { artists, songs } from "@/db/schema";
+import { db } from "@/index";
+import { eq } from "drizzle-orm";
+import { notFound } from "next/navigation";
 
-type AdminSongFormPageProps = {
-  params: {
-    id: string;
+export default async function AdminSongFormPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  //GET one song
+  const { id } = await params;
+  const songId = Number(id);
+
+  const song = await db.query.songs.findFirst({
+    where: eq(songs.id, songId),
+    with: {
+      artist_song: {
+        with: {
+          artist: true,
+        },
+      },
+    },
+  });
+
+  if (!song) {
+    notFound();
+  }
+
+  const formattedSong = {
+    id: song.id,
+    title: song.title,
+    lyrics: song.lyrics,
+    createdAt: song.createdAt.toISOString(),
+    updatedAt: song.updatedAt.toISOString(),
+    artists: song.artist_song.map((link) => ({
+      ...link.artist,
+      createdAt: link.artist.createdAt.toISOString(),
+      updatedAt: link.artist.updatedAt.toISOString(),
+    })),
   };
-};
 
-type Artist = {
-  id: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-};
+  //GET all artists
 
-const AdminSongFormPage = async ({ params }: AdminSongFormPageProps) => {
-  const { id } = params;
+  const allArtists = await db.select().from(artists);
 
-  const response = await fetch(
-    `${environment.NEXT_PUBLIC_BASE_URL}/api/songs/${id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  const song = await response.json();
-  const songData = song.data;
-
-  const response2 = await fetch(
-    `${environment.NEXT_PUBLIC_BASE_URL}/api/artists`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  const allArtist = await response2.json();
-
-  const formattedAllArtists = allArtist.data.map((artist: Artist) => ({
+  const formattedArtists = allArtists.map((artist) => ({
     ...artist,
-    createdAt: artist.createdAt.toString(),
-    updatedAt: artist.updatedAt.toString(),
+    createdAt: artist.createdAt.toISOString(),
+    updatedAt: artist.updatedAt.toISOString(),
   }));
 
   return (
-    <AdminSongForm id={id} song={songData} artists={formattedAllArtists} />
+    <AdminSongForm id={id} song={formattedSong} artists={formattedArtists} />
   );
-};
-
-export default AdminSongFormPage;
+}

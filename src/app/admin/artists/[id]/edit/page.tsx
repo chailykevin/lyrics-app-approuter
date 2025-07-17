@@ -1,30 +1,32 @@
 import AdminArtistForm from "@/components/ArtistForm";
-import environment from "@/config/environment";
+import { artists } from "@/db/schema";
+import { db } from "@/index";
+import { eq } from "drizzle-orm";
+import { notFound } from "next/navigation";
 
-type AdminArtistFormPageProps = {
-  params: {
-    id: string;
+export default async function AdminArtistFormPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  //GET one artis
+  const { id } = await params;
+  const artistId = Number(id);
+
+  const artist = await db
+    .select()
+    .from(artists)
+    .where(eq(artists.id, artistId));
+
+  if (!artist || artist.length === 0) {
+    notFound();
+  }
+
+  const formattedArtist = {
+    ...artist[0],
+    createdAt: artist[0].createdAt.toISOString(),
+    updatedAt: artist[0].updatedAt.toISOString(),
   };
-};
 
-const AdminArtistFormPage = async ({ params }: AdminArtistFormPageProps) => {
-  const { id } = params;
-
-  const response = await fetch(
-    `$${environment.NEXT_PUBLIC_BASE_URL}/api/artists/${id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  const artist = await response.json();
-
-  console.log(artist);
-
-  return <AdminArtistForm artist={artist.data} id={id} />;
-};
-
-export default AdminArtistFormPage;
+  return <AdminArtistForm artist={formattedArtist} id={id} />;
+}

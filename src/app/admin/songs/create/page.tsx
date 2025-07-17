@@ -1,33 +1,19 @@
+export const dynamic = "force-dynamic";
+
 import AdminSongForm from "@/components/SongForm";
-import environment from "@/config/environment";
+import { artists } from "@/db/schema";
+import { db } from "@/index";
 
-type Artist = {
-  id: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-};
+export default async function AdminNewSongPage() {
+  //GET all artists
 
-const AdminNewSongPage = async () => {
-  const response = await fetch(
-    `${environment.NEXT_PUBLIC_BASE_URL}/api/artists`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const allArtists = await db.select().from(artists);
 
-  const allArtist = await response.json();
-
-  const formattedArtists = allArtist.data.map((artist: Artist) => ({
+  const formattedArtists = allArtists.map((artist) => ({
     ...artist,
     createdAt: artist.createdAt.toString(),
     updatedAt: artist.updatedAt.toString(),
   }));
 
   return <AdminSongForm artists={formattedArtists} />;
-};
-
-export default AdminNewSongPage;
+}
