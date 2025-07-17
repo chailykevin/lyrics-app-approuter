@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useState, useEffect } from "react"; // Import useEffect
+import { useState, useEffect } from "react"; // Import useEffect
 import Link from "next/link"; // Import Link untuk tombol kembali
 
 // --- Type Definitions (pastikan ini konsisten di seluruh aplikasi Anda) ---

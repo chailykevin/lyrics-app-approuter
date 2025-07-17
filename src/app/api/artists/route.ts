@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import * as yup from "yup";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const allArtists = await db.select().from(artists);
 
