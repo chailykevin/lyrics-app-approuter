@@ -3,14 +3,14 @@ import Link from "next/link";
 import { FaMusic } from "react-icons/fa6";
 
 type Artist = {
-  id: string;
+  id: number;
   name: string;
   createdAt: string;
   updatedAt: string;
 };
 
 type PropTypes = {
-  songId: string;
+  songId: number;
   songName: string;
   songArtists: Artist[];
   createdAt: string;
