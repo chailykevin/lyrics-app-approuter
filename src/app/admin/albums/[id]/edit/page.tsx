@@ -44,6 +44,7 @@ export default async function AdminAlbumFormPage({
   const album = {
     id: response.id,
     title: response.title,
+    coverImagePath: response.coverImagePath,
     releaseDate: format(
       new Date(response.releaseDate.toISOString()),
       "yyyy-MM-dd"
