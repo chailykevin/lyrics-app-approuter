@@ -1,34 +1,9 @@
 import UserSongCard from "@/components/UserSongCard";
-import { albums, artists } from "@/db/schema";
+import { albums } from "@/db/schema";
 import { db } from "@/index";
 import { format } from "date-fns";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-
-type Album = {
-  id: number;
-  title: string;
-  releaseDate: string;
-  artists: Artist[];
-  songs: Song[];
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Artist = {
-  id: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Song = {
-  id: number;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-  artists: Artist[];
-};
 
 export default async function UserDetailAlbum({
   params,

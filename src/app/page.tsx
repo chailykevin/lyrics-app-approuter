@@ -4,7 +4,7 @@ import UserSongCard from "@/components/UserSongCard";
 import { db } from "..";
 import UserAlbumCard from "@/components/UserAlbumCard";
 import { albums } from "@/db/schema";
-import { asc, desc } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 
 export default async function Home() {
   //GET all songs
