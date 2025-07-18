@@ -106,18 +106,18 @@ export async function editAlbum(formData: FormData, albumId: number) {
     }));
 
     await tx.insert(album_song).values(albumSongs);
-
-    const updatedAlbumData = await db
-      .select()
-      .from(albums)
-      .where(eq(albums.id, albumId));
-
-    if (updatedAlbumData.length === 1) {
-      return "Sukses";
-    } else {
-      return "Gagal";
-    }
   });
+
+  const updatedAlbumData = await db
+    .select()
+    .from(albums)
+    .where(eq(albums.id, albumId));
+
+  if (updatedAlbumData.length === 1) {
+    return "Sukses";
+  } else {
+    return "Gagal";
+  }
 }
 
 export async function deleteAlbum(formData: FormData) {

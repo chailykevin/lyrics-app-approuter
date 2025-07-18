@@ -82,8 +82,8 @@ export default function AdminAlbumForm({
     setIsSubmitting(true);
 
     const response = id
-      ? await addAlbum(new FormData(event.currentTarget))
-      : await editAlbum(new FormData(event.currentTarget), id!);
+      ? await editAlbum(new FormData(event.currentTarget), id!)
+      : await addAlbum(new FormData(event.currentTarget));
 
     if (response === "Sukses") {
       alert(`Album berhasil ${id ? "diubah" : "ditambahkan"}!`);
