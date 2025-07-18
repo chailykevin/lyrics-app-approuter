@@ -3,7 +3,9 @@
 import { album_artist, album_song, albums } from "@/db/schema";
 import { db } from "@/index";
 import { eq } from "drizzle-orm";
+import { writeFile } from "fs/promises";
 import { notFound } from "next/navigation";
+import path from "path";
 import * as yup from "yup";
 
 const albumSchema = yup.object({
@@ -23,7 +25,7 @@ const albumSchema = yup.object({
     .required(),
 });
 
-export async function addAlbum(formData: FormData) {
+export async function addAlbum(formData: FormData, imageFile?: File) {
   const rawFormData = {
     title: formData.get("title"),
     releaseDate: formData.get("releaseDate"),
@@ -35,9 +37,14 @@ export async function addAlbum(formData: FormData) {
 
   let albumId: number;
 
+  const filename = imageFile
+    ? Date.now() + imageFile.name.replaceAll(" ", "_")
+    : "default.png";
+
   await db.transaction(async (tx) => {
     const newAlbum = await tx.insert(albums).values({
       title: validationData.title,
+      coverImagePath: `/${filename}`,
       releaseDate: new Date(validationData.releaseDate),
     });
 
@@ -57,6 +64,15 @@ export async function addAlbum(formData: FormData) {
 
     await tx.insert(album_song).values(albumSongs);
   });
+
+  if (imageFile) {
+    const buffer = Buffer.from(await imageFile!.arrayBuffer());
+
+    await writeFile(
+      path.join(process.cwd(), "public/albumCover/" + filename),
+      buffer
+    );
+  }
 
   const newAlbum = await db
     .select()
