@@ -188,6 +188,11 @@ export async function deleteAlbum(formData: FormData) {
 
   let deletedAlbum;
 
+  const oldFileName = await db
+    .select({ coverImagePath: albums.coverImagePath })
+    .from(albums)
+    .where(eq(albums.id, rawFormData.id));
+
   await db.transaction(async (tx) => {
     await tx
       .delete(album_artist)
@@ -197,6 +202,15 @@ export async function deleteAlbum(formData: FormData) {
 
     deletedAlbum = await tx.delete(albums).where(eq(albums.id, rawFormData.id));
   });
+
+  if (!(oldFileName[0].coverImagePath === "/default.png")) {
+    await unlink(
+      path.join(
+        process.cwd(),
+        "public/albumCover/" + oldFileName[0].coverImagePath
+      )
+    );
+  }
 
   if (deletedAlbum![0].affectedRows === 0) {
     return "Gagal";
