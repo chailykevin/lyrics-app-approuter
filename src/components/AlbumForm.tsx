@@ -150,6 +150,7 @@ export default function AdminAlbumForm({
           name="coverImage"
           className="hidden"
           onChange={handleAlbumCoverChange}
+          accept=".jpg, .jpeg, .png"
         />
       </div>
 
