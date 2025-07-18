@@ -1,9 +1,11 @@
 import { format } from "date-fns";
+import Image from "next/image";
 import Link from "next/link";
 
 type Album = {
   id: number;
   title: string;
+  coverImagePath: string;
   releaseDate: string;
   artists: Artist[];
   songs: Song[];
@@ -33,7 +35,14 @@ export default function UserAlbumCard({ album }: UserAlbumCardProps) {
   return (
     <div className="border-1 rounded-sm p-4 max-w-max">
       {/* Untuk Gambar  */}
-      <div className="w-60 h-60"></div>
+      <div className="w-60 h-60">
+        <Image
+          src={`/albumCover${album.coverImagePath}`}
+          alt={`${album.title} Album Cover`}
+          width={240}
+          height={240}
+        />
+      </div>
       <h3 className="text-xl font-bold">{album.title}</h3>
       <p>{album.artists.map((artist) => artist.name).join(", ")}</p>
       <div className="flex flex-row">

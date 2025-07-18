@@ -3,6 +3,7 @@ import { albums } from "@/db/schema";
 import { db } from "@/index";
 import { format } from "date-fns";
 import { eq } from "drizzle-orm";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 export default async function UserDetailAlbum({
@@ -48,6 +49,7 @@ export default async function UserDetailAlbum({
   const album = {
     id: response.id,
     title: response.title,
+    coverImagePath: response.coverImagePath,
     releaseDate: format(
       new Date(response.releaseDate.toISOString()),
       "yyyy-MM-dd"
@@ -75,7 +77,14 @@ export default async function UserDetailAlbum({
     <main className="flex flex-col justify-center items-center w-full gap-6 py-4 px-120">
       <div className="flex gap-4 w-full">
         {/* Image */}
-        <div className="flex grow-0 min-w-60 h-60 border-1 rounded-md"></div>
+        <div className="flex grow-0 min-w-60 h-60 border-1 rounded-md">
+          <Image
+            src={`/albumCover${album.coverImagePath}`}
+            alt={`${album.title} Album Cover`}
+            width={240}
+            height={240}
+          />
+        </div>
         {/* Details */}
         <div className="flex flex-col w-full">
           <div className="flex flex-col gap-1">

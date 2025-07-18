@@ -61,6 +61,7 @@ export default async function Home() {
   const allAlbums = responses.map((response) => ({
     id: response.id,
     title: response.title,
+    coverImagePath: response.coverImagePath,
     releaseDate: response.releaseDate.toISOString(),
     createdAt: response.createdAt.toISOString(),
     updatedAt: response.updatedAt.toISOString(),
