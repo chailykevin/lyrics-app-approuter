@@ -1,6 +1,7 @@
 "use client";
 
 import { addAlbum, editAlbum } from "@/app/actions/album";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -16,6 +17,7 @@ type Album = {
   id: number;
   title: string;
   releaseDate: string;
+  coverImagePath: string;
   createdAt: string;
   updatedAt: string;
   artists: Artist[];
@@ -43,6 +45,12 @@ export default function AdminAlbumForm({
   songs,
 }: AdminAlbumFormProps) {
   const [title, setTitle] = useState(album?.title || "");
+  const [coverImagePath, setCoverImagePath] = useState(
+    album?.coverImagePath || "/default.png"
+  );
+  const [imageURI, setImageURI] = useState("");
+  const [imageFile, setImageFile] = useState<File>();
+  const [isNew, setIsNew] = useState(false);
   const [releaseDate, setReleaseDate] = useState(album?.releaseDate || "");
   const [selectedArtistsId, setSelectedArtistsId] = useState<number[]>(
     album?.artists.map((artist) => artist.id) || []
@@ -59,6 +67,18 @@ export default function AdminAlbumForm({
     setSelectedArtistsId(album?.artists.map((artist) => artist.id) || []);
     setSelectedSongsId(album?.songs.map((song) => song.id) || []);
   }, [album]);
+
+  function handleAlbumCoverChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (event.target.files?.length === 0) {
+      setCoverImagePath(album?.coverImagePath || coverImagePath);
+      return;
+    }
+
+    setImageFile(event.target.files![0]);
+    setImageURI(URL.createObjectURL(event.target.files![0]));
+    setCoverImagePath(event.target.files![0].name);
+    setIsNew(true);
+  }
 
   function handleArtistChange(event: ChangeEvent<HTMLSelectElement>) {
     const { options } = event.target;
@@ -82,8 +102,8 @@ export default function AdminAlbumForm({
     setIsSubmitting(true);
 
     const response = id
-      ? await editAlbum(new FormData(event.currentTarget), id!)
-      : await addAlbum(new FormData(event.currentTarget));
+      ? await editAlbum(new FormData(event.currentTarget), id!, imageFile!)
+      : await addAlbum(new FormData(event.currentTarget), imageFile);
 
     if (response === "Sukses") {
       alert(`Album berhasil ${id ? "diubah" : "ditambahkan"}!`);
@@ -107,6 +127,31 @@ export default function AdminAlbumForm({
       <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
         {formTitle}
       </h2>
+
+      <div className="w-40 h-40">
+        <Image
+          src={isNew ? imageURI : `/albumCover${coverImagePath}`}
+          alt={coverImagePath}
+          width="160"
+          height="160"
+        />
+      </div>
+
+      <div>
+        <label
+          htmlFor="coverImage"
+          className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Pilih Gambar
+        </label>
+        <input
+          type="file"
+          id="coverImage"
+          name="coverImage"
+          className="hidden"
+          onChange={handleAlbumCoverChange}
+        />
+      </div>
 
       <div>
         <label
