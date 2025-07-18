@@ -27,6 +27,9 @@ export const albums = mysqlTable("albums", {
   id: int("id").autoincrement().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   releaseDate: date().notNull(),
+  coverImagePath: varchar("cover_image_path", { length: 500 })
+    .default("/default.png")
+    .notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
