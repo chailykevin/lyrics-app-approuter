@@ -3,7 +3,7 @@
 import { album_artist, album_song, albums } from "@/db/schema";
 import { db } from "@/index";
 import { eq } from "drizzle-orm";
-import { writeFile } from "fs/promises";
+import { writeFile, unlink } from "fs/promises";
 import { notFound } from "next/navigation";
 import path from "path";
 import * as yup from "yup";
@@ -86,7 +86,11 @@ export async function addAlbum(formData: FormData, imageFile?: File) {
   }
 }
 
-export async function editAlbum(formData: FormData, albumId: number) {
+export async function editAlbum(
+  formData: FormData,
+  albumId: number,
+  imageFile: File
+) {
   const rawFormData = {
     title: formData.get("title"),
     releaseDate: formData.get("releaseDate"),
@@ -96,13 +100,30 @@ export async function editAlbum(formData: FormData, albumId: number) {
 
   const validationData = await albumSchema.validate(rawFormData);
 
+  const filename = imageFile
+    ? Date.now() + imageFile.name.replaceAll(" ", "_")
+    : "";
+
+  const oldFileName = await db
+    .select({ coverImagePath: albums.coverImagePath })
+    .from(albums)
+    .where(eq(albums.id, albumId));
+
   await db.transaction(async (tx) => {
     await tx
       .update(albums)
-      .set({
-        title: validationData.title,
-        releaseDate: new Date(validationData.releaseDate),
-      })
+      .set(
+        filename === ""
+          ? {
+              title: validationData.title,
+              releaseDate: new Date(validationData.releaseDate),
+            }
+          : {
+              title: validationData.title,
+              coverImagePath: `/${filename}`,
+              releaseDate: new Date(validationData.releaseDate),
+            }
+      )
       .where(eq(albums.id, albumId));
 
     await tx.delete(album_artist).where(eq(album_artist.albumId, albumId));
@@ -123,6 +144,26 @@ export async function editAlbum(formData: FormData, albumId: number) {
 
     await tx.insert(album_song).values(albumSongs);
   });
+
+  if (!(filename === "")) {
+    //Delete, baru tambah baru
+    await unlink(
+      path.join(
+        process.cwd(),
+        "public/albumCover/" + oldFileName[0].coverImagePath
+      )
+    );
+
+    // tambah baru
+    if (imageFile) {
+      const buffer = Buffer.from(await imageFile!.arrayBuffer());
+
+      await writeFile(
+        path.join(process.cwd(), "public/albumCover/" + filename),
+        buffer
+      );
+    }
+  }
 
   const updatedAlbumData = await db
     .select()
