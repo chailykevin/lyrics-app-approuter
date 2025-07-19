@@ -15,7 +15,7 @@ export default function Pagination({ dataCount }: PaginationProps) {
   const pageCount = Math.ceil(dataCount / 10);
 
   const createPageURL = (pageNumber: number | string) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams();
     params.set("page", pageNumber.toString());
     return `${pathname}?${params.toString()}`;
   };
@@ -26,7 +26,7 @@ export default function Pagination({ dataCount }: PaginationProps) {
         className="flex justify-center items-center border-1 p-2 hover:bg-gray-300 transition cursor-pointer w-12 h-12"
         href={currentPage === 1 ? "" : createPageURL(currentPage - 1)}
       >
-        <ArrowLeft></ArrowLeft>
+        <FaArrowLeft />
       </Link>
       {Array.from({ length: pageCount }).map((count, index) => (
         <Link
@@ -45,24 +45,8 @@ export default function Pagination({ dataCount }: PaginationProps) {
         className="flex justify-center items-center border-1 p-2 hover:bg-gray-300 transition cursor-pointer w-12 h-12"
         href={currentPage === pageCount ? "" : createPageURL(currentPage + 1)}
       >
-        <ArrowRight></ArrowRight>
+        <FaArrowRight />
       </Link>
     </div>
-  );
-}
-
-function ArrowLeft() {
-  return (
-    <>
-      <FaArrowLeft />
-    </>
-  );
-}
-
-function ArrowRight() {
-  return (
-    <>
-      <FaArrowRight />
-    </>
   );
 }
