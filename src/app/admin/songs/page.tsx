@@ -23,12 +23,12 @@ type Artist = {
 };
 
 export default async function AdminSongsPage(props: {
-  searchProps?: Promise<{
+  searchParams?: Promise<{
     page?: string;
   }>;
 }) {
-  const searchProps = await props.searchProps;
-  const currentPage = Number(searchProps?.page) || 1;
+  const searchParams = await props.searchParams;
+  const currentPage = Number(searchParams?.page) || 1;
   //GET all songs
 
   const songCount = await db.select().from(songs);
