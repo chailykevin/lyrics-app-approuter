@@ -1,6 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import AlbumCard from "@/components/AlbumCard";
+import Pagination from "@/components/Pagination";
+import { albums } from "@/db/schema";
 import { db } from "@/index";
 import Link from "next/link";
 
@@ -29,8 +31,17 @@ type Song = {
   artists: Artist[];
 };
 
-export default async function AdminAlbumsPage() {
+export default async function AdminAlbumsPage(props: {
+  searchParams?: Promise<{
+    page?: string;
+  }>;
+}) {
+  const searchParams = await props.searchParams;
+  const currentPage = Number(searchParams?.page) || 1;
+
   //Get all albums
+
+  const albumCount = await db.select().from(albums);
 
   const responses = await db.query.albums.findMany({
     with: {
@@ -53,6 +64,8 @@ export default async function AdminAlbumsPage() {
         },
       },
     },
+    limit: 10,
+    offset: (currentPage - 1) * 10,
   });
 
   const allAlbums = responses.map((response) => ({
@@ -89,6 +102,7 @@ export default async function AdminAlbumsPage() {
       {allAlbums.map((album: Album) => {
         return <AlbumCard key={album.id} album={album} />;
       })}
+      <Pagination dataCount={albumCount.length} />
     </>
   );
 }

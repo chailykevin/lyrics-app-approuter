@@ -1,6 +1,8 @@
 export const dynamic = "force-dynamic";
 
+import Pagination from "@/components/Pagination";
 import SongCard from "@/components/SongCard";
+import { songs } from "@/db/schema";
 import { db } from "@/index";
 import Link from "next/link";
 
@@ -20,8 +22,16 @@ type Artist = {
   updatedAt: string;
 };
 
-export default async function AdminSongsPage() {
+export default async function AdminSongsPage(props: {
+  searchProps?: Promise<{
+    page?: string;
+  }>;
+}) {
+  const searchProps = await props.searchProps;
+  const currentPage = Number(searchProps?.page) || 1;
   //GET all songs
+
+  const songCount = await db.select().from(songs);
 
   const allSongs = await db.query.songs.findMany({
     with: {
@@ -31,6 +41,8 @@ export default async function AdminSongsPage() {
         },
       },
     },
+    limit: 10,
+    offset: (currentPage - 1) * 10,
   });
 
   const allSongs2 = allSongs.map((song) => ({
@@ -57,6 +69,7 @@ export default async function AdminSongsPage() {
       {allSongs2.map((song: Song) => {
         return <SongCard key={song.id} song={song} />;
       })}
+      <Pagination dataCount={songCount.length} />
     </>
   );
 }
