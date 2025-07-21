@@ -41,10 +41,12 @@ export default async function AdminAlbumsPage(props: {
 }) {
   const searchParams = await props.searchParams;
   const currentPage = Number(searchParams?.page) || 1;
+  //Ga boleh ada magic number
   const search = searchParams?.search || 1;
 
   //Get all albums
 
+  //Bisa ditarik dan dijadiin sebuah function, namanya harus deskriptif (abstraksi)
   const albumCount =
     search === 1
       ? await db.select().from(albums)
@@ -55,6 +57,8 @@ export default async function AdminAlbumsPage(props: {
             like(sql`lower(${albums.title})`, `%${search.toLowerCase()}%`)
           );
 
+  //Bisa ditarik dan dijadiin sebuah function, namanya harus deskriptif (abstraksi)
+  //Nama variabel harus jelas banget
   const responses =
     search === 1
       ? await db.query.albums.findMany({
@@ -107,6 +111,7 @@ export default async function AdminAlbumsPage(props: {
           offset: (currentPage - 1) * 10,
         });
 
+  //Bisa ditarik dan dijadiin sebuah function, namanya harus deskriptif (abstraksi)
   const allAlbums = responses.map((response) => ({
     id: response.id,
     title: response.title,
