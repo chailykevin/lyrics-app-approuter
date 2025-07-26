@@ -4,7 +4,7 @@ import UserFilter from "@/components/UserFilter";
 import UserSongCard from "@/components/UserSongCard";
 import { albums, artists, songs } from "@/db/schema";
 import { db } from "@/index";
-import { desc, like, sql } from "drizzle-orm";
+import { desc, like } from "drizzle-orm";
 
 export default async function UserSearchPage(props: {
   searchParams?: Promise<{
@@ -70,7 +70,7 @@ export default async function UserSearchPage(props: {
           })
       : filter === "all"
       ? await db.query.albums.findMany({
-          where: like(sql`lower(${albums.title})`, `%${query.toLowerCase()}%`),
+          where: like(albums.title, `%${query}%`),
           limit: 4,
           orderBy: [desc(albums.createdAt)],
           with: {
@@ -95,7 +95,7 @@ export default async function UserSearchPage(props: {
           },
         })
       : await db.query.albums.findMany({
-          where: like(sql`lower(${albums.title})`, `%${query.toLowerCase()}%`),
+          where: like(albums.title, `%${query}%`),
           orderBy: [desc(albums.createdAt)],
           with: {
             album_artist: {
@@ -153,14 +153,12 @@ export default async function UserSearchPage(props: {
       ? await db
           .select()
           .from(artists)
-          // .where(like(sql`lower(${artists.name})`, `%${query.toLowerCase()}%`))
-          .where(like(artists.name, query))
+          .where(like(artists.name, `%${query}%`))
           .limit(5)
       : await db
           .select()
           .from(artists)
-          // .where(like(sql`lower(${artists.name})`, `%${query.toLowerCase()}%`));
-          .where(like(artists.name, query));
+          .where(like(artists.name, `%${query}%`));
   const allArtists = responses2.map((response) => ({
     ...response,
     createdAt: response.createdAt.toISOString(),
@@ -192,7 +190,7 @@ export default async function UserSearchPage(props: {
           })
       : filter === "all"
       ? await db.query.songs.findMany({
-          where: like(sql`lower(${songs.title})`, `%${query.toLowerCase()}%`),
+          where: like(songs.title, `%${query}%`),
           with: {
             artist_song: {
               with: {
@@ -203,7 +201,7 @@ export default async function UserSearchPage(props: {
           limit: 5,
         })
       : await db.query.songs.findMany({
-          where: like(sql`lower(${songs.title})`, `%${query.toLowerCase()}%`),
+          where: like(songs.title, `%${query}%`),
           with: {
             artist_song: {
               with: {
